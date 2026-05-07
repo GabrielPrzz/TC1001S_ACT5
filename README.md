@@ -79,207 +79,96 @@ memory.py
 5. Repites hasta encontrar todos los pares...
 ```
 
-## Ejercicios de Mejora
+## Caracteristicas Implementadas/Mejoradas
 
-El código incluye 5 ejercicios sugeridos:
 
-### 1. Contar y imprimir taps 📊
+### 1. Visualiza el numero de taps! ✅
+Para poder mejorar, implementamos el contador de taps, pudiendo ver si lo haces en menos intentos
 ```python
-state = {'mark': None, 'taps': 0}
-
+...
 def tap(x, y):
     """Update mark and hidden tiles based on tap."""
-    state['taps'] += 1
-    print(f"Taps totales: {state['taps']}")
+    global tap_count
+    if all_revealed():
+        return
     
+    tap_count += 1
     spot = index(x, y)
     mark = state['mark']
+    
     if mark is None or mark == spot or tiles[mark] != tiles[spot]:
         state['mark'] = spot
     else:
         hide[spot] = False
         hide[mark] = False
         state['mark'] = None
-```
+...
 
-### 2. Reducir a grid 4x4 🎯
-```python
-# Cambiar de 8x8 (64 tiles) a 4x4 (16 tiles)
-tiles = list(range(8)) * 2  # 8 números × 2 = 16 losetas
-hide = [True] * 16
-
-def index(x, y):
-    """Convert (x, y) coordinates to tiles index."""
-    return int((x + 200) // 100 + ((y + 200) // 100) * 4)  # Cambiar de 50 a 100, de 8 a 4
-
-def xy(count):
-    """Convert tiles count to (x, y) coordinates."""
-    return (count % 4) * 100 - 200, (count // 4) * 100 - 200
-```
-
-### 3. Detectar cuando todos los tiles se revelan ✨
-```python
-def draw():
-    """Draw image and tiles."""
-    clear()
-    goto(0, 0)
-    shape(car)
-    stamp()
-    for count in range(64):
-        if hide[count]:
-            x, y = xy(count)
-            square(x, y)
-    mark = state['mark']
-    if mark is not None and hide[mark]:
-        x, y = xy(mark)
-        up()
-        goto(x + 2, y)
-        color('black')
-        write(tiles[mark], font=('Arial', 30, 'normal'))
-    
-    # ✅ NUEVO: Detectar si ganó
-    if all(not h for h in hide):
-        up()
-        goto(0, 180)
-        color('red')
-        write('¡GANASTE!', align='center', font=('Arial', 40, 'bold'))
-    
-    update()
-    ontimer(draw, 100)
-```
-
-### 4. Centrar números de un dígito 📍
-```python
-def draw():
-    """Draw image and tiles."""
-    # ... código anterior ...
-    mark = state['mark']
-    if mark is not None and hide[mark]:
-        x, y = xy(mark)
-        up()
-        number = tiles[mark]
-        
-        # ✅ NUEVO: Centrar según número de dígitos
-        if number < 10:
-            goto(x + 15, y + 10)  # Centrar números de 1 dígito
-        else:
-            goto(x + 2, y + 10)   # Números de 2 dígitos
-        
-        color('black')
-        write(number, font=('Arial', 30, 'normal'))
-    # ... resto del código ...
-```
-
-### 5. Usar letras en lugar de números 🔤
-```python
-from string import ascii_uppercase
-
-# En lugar de números, usar letras
-tiles = list(ascii_uppercase[:16]) * 2  # A-P repetidas
-hide = [True] * 32
-
-def tap(x, y):
-    """Update mark and hidden tiles based on tap."""
-    spot = index(x, y)
-    mark = state['mark']
-    
-    # La lógica de comparación funciona igual con letras
-    if mark is None or mark == spot or tiles[mark] != tiles[spot]:
-        state['mark'] = spot
-    else:
-        hide[spot] = False
-        hide[mark] = False
-        state['mark'] = None
-```
-
-## Versión Completa: 4x4 con Contador
-
-```python
-from random import *
-from turtle import *
-from freegames import path
-
-car = path('car.gif')
-tiles = list(range(8)) * 2
-state = {'mark': None, 'taps': 0, 'pairs': 0}
-hide = [True] * 16
-
-def square(x, y):
-    """Draw white square with black outline at (x, y)."""
+...
+    # Mostrar contador de intentos
     up()
-    goto(x, y)
-    down()
-    color('black', 'white')
-    begin_fill()
-    for count in range(4):
-        forward(100)
-        left(90)
-    end_fill()
-
-def index(x, y):
-    """Convert (x, y) coordinates to tiles index."""
-    return int((x + 200) // 100 + ((y + 200) // 100) * 4)
-
-def xy(count):
-    """Convert tiles count to (x, y) coordinates."""
-    return (count % 4) * 100 - 200, (count // 4) * 100 - 200
-
-def tap(x, y):
-    """Update mark and hidden tiles based on tap."""
-    state['taps'] += 1
-    spot = index(x, y)
-    mark = state['mark']
-    
-    if mark is None or mark == spot or tiles[mark] != tiles[spot]:
-        state['mark'] = spot
-    else:
-        hide[spot] = False
-        hide[mark] = False
-        state['mark'] = None
-        state['pairs'] += 1
-
-def draw():
-    """Draw image and tiles."""
-    clear()
-    for count in range(16):
-        if hide[count]:
-            x, y = xy(count)
-            square(x, y)
-    
-    mark = state['mark']
-    if mark is not None and hide[mark]:
-        x, y = xy(mark)
-        up()
-        goto(x + 40, y + 40)
-        color('black')
-        write(tiles[mark], align='center', font=('Arial', 40, 'normal'))
-    
-    # Mostrar estadísticas
-    up()
-    goto(-180, 180)
+    goto(-195, 175)
     color('black')
-    write(f"Taps: {state['taps']} | Pares: {state['pairs']}/8", font=('Arial', 12, 'normal'))
-    
-    # Detectar victoria
-    if state['pairs'] == 8:
-        up()
-        goto(0, 0)
-        color('red')
-        write('¡GANASTE!', align='center', font=('Arial', 50, 'bold'))
-    
-    update()
-    ontimer(draw, 100)
+    write(f'Intentos: {tap_count}', font=('Arial', 14, 'bold'))
+...
 
-shuffle(tiles)
-setup(420, 420, 370, 0)
-addshape(car)
-hideturtle()
-tracer(False)
-onscreenclick(tap)
-draw()
-done()
 ```
 
+### 2. Deteccion de todos los tableros descubiertos ✅
+Se agrego a forma de win condition
+```python
+def all_revealed():
+    """Return True if all tiles have been uncovered."""
+    return not any(hide)
+```
+
+### 3. Centrado de texto en casillas ✅
+Con fines de hacer mas estetico el display
+```python
+
+    # Escribir número en el centro
+    if number is not None:
+        up()
+        goto(x + 25, y + 15)
+        color('white')
+        write(number, align='center', font=('Arial', 28, 'bold'))
+        
+```
+
+### 4. Celdas de colores para facilitar la percepcion y la memoria ✅
+```python
+...
+# 32 colores diferentes (necesitamos 32 pares para 64 casillas)
+colors = ['red', 'blue', 'green', 'yellow', 'purple', 'orange', 
+          'pink', 'cyan', 'magenta', 'brown', 'gold', 'lime',
+          'turquoise', 'salmon', 'khaki', 'coral', 'teal', 'navy',
+          'olive', 'maroon', 'tomato', 'skyblue', 'springgreen', 'violet',
+          'indigo', 'aquamarine', 'peachpuff', 'wheat', 'tan', 'plum', 'orchid', 'darkseagreen']
+
+# Crear 32 pares diferentes: [(color, número), ...] * 2
+base_tiles = [(colors[i], i + 1) for i in range(32)]
+tiles = base_tiles + base_tiles  # 64 elementos totales
+...
+
+...
+# Dibujar todos los cuadrados
+    for count in range(64):
+        x, y = xy(count)
+        color_tile, num = tiles[count]
+        
+        if hide[count]:
+            # Si está oculto pero es el marcado, mostrar color y número
+            if count == mark:
+                square(x, y, color_tile, num)
+            else:
+                # Si está oculto y no es marcado, blanco sin número
+                square(x, y, 'white')
+        else:
+            # Si está revelado, mostrar color y número
+            square(x, y, color_tile, num)
+...
+```
+ 
 ## Posibles Mejoras Avanzadas
 
 - ⏱️ **Cronómetro** - Registrar tiempo por partida
